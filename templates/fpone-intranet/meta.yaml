@@ -1,0 +1,45 @@
+name: FPOne Intranet
+description: FPOne Intranet (Sistema AgroNext)
+instructions: null
+changeLog:
+  - date: 2026-09-30
+    description: first release
+links:
+  - label: Docs
+    url: https://github.com/mafjr21/intranet
+schema:
+  type: object
+  required:
+    - appServiceName
+    - appServiceImage
+    - appDomain
+    - databaseServiceName
+  properties:
+    appServiceName:
+      type: string
+      title: App Service Name
+      default: fpone-intranet
+    appServiceImage:
+      type: string
+      title: App Service Image
+      default: ghcr.io/mafjr21/fpone-intranet:latest
+    appDomain:
+      type: string
+      title: App Domain
+      default: fpone.example.com
+    databaseServiceName:
+      type: string
+      title: Database Service Name
+      default: fpone-db
+    s3Bucket:
+      type: string
+      title: S3 Bucket Name
+      default: intranet
+benefits:
+  - title: Gestão Agrícola
+    description: Intranet completa da Fazenda Progresso.
+features:
+  - title: Completo
+    description: Frontend Next.js, Backend NestJS, Postgres, MinIO e mais.
+tags:
+  - Utility
