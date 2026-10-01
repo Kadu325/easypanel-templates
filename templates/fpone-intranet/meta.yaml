@@ -1,45 +1,110 @@
 name: FPOne Intranet
-description: FPOne Intranet (Sistema AgroNext)
-instructions: null
+description: FPOne Intranet - Sistema corporativo com autenticação Active Directory (LDAP), comunicados, gestão de documentos e pessoas. Armazenamento S3 via Garage (leve, sem dependências externas).
+instructions: |
+  1. Preencha as credenciais do Active Directory (Bind DN e Senha).
+  2. Após o deploy, execute o bootstrap do Garage via CLI para criar o bucket e a chave de acesso:
+     a. Acesse o terminal do serviço `<app>-garage` no Easypanel.
+     b. Execute: garage status   (anote o NODE_ID exibido)
+     c. Execute: garage layout assign -z dc1 -c 10G <NODE_ID>
+     d. Execute: garage layout apply --version 1
+     e. Execute: garage bucket create fpone-files
+     f. Execute: garage key create fpone-app   (anote Access Key ID e Secret Key)
+     g. Execute: garage bucket allow fpone-files --read --write --key fpone-app
+  3. Configure S3_ACCESS_KEY e S3_SECRET_KEY no serviço `web` com os valores do passo 2f.
+  4. Reinicie o serviço `web`.
 changeLog:
+  - date: 2026-10-01
+    description: "Migração MinIO → Garage (S3-compatível, nó único, sem container init temporário). Adição de GARAGE_ENDPOINT. Atualização da região S3 de us-east-1 para garage."
   - date: 2026-09-30
-    description: first release
+    description: Suporte completo a Active Directory LDAP, Postgres 16, MinIO e Next.js 16 standalone
 links:
-  - label: Docs
+  - label: Repositório GitHub
     url: https://github.com/mafjr21/intranet
+  - label: Documentação do Garage
+    url: https://garagehq.deuxfleurs.fr/documentation/
 schema:
   type: object
   required:
     - appServiceName
     - appServiceImage
-    - appDomain
     - databaseServiceName
+    - s3Bucket
+    - adHost
+    - adPort
+    - adBaseDn
+    - adBindDn
+    - adBindPassword
   properties:
     appServiceName:
       type: string
-      title: App Service Name
+      title: Nome do Serviço Principal
       default: fpone-intranet
     appServiceImage:
       type: string
-      title: App Service Image
-      default: ghcr.io/mafjr21/fpone-intranet:latest
-    appDomain:
-      type: string
-      title: App Domain
-      default: fpone.example.com
+      title: Imagem Docker da Aplicação
+      default: ghcr.io/mafjr21/intranet:latest
     databaseServiceName:
       type: string
-      title: Database Service Name
+      title: Nome do Serviço PostgreSQL
       default: fpone-db
     s3Bucket:
       type: string
-      title: S3 Bucket Name
-      default: intranet
+      title: Nome do Bucket S3
+      default: fpone-files
+    s3AccessKey:
+      type: string
+      title: "S3 Access Key (preencher após bootstrap do Garage)"
+      default: ""
+    s3SecretKey:
+      type: string
+      title: "S3 Secret Key (preencher após bootstrap do Garage)"
+      default: ""
+    companyName:
+      type: string
+      title: Nome da Empresa (Sidebar)
+      default: Fazenda Progresso
+    adHost:
+      type: string
+      title: IP / Host do Active Directory
+      default: "192.168.77.250"
+    adPort:
+      type: integer
+      title: Porta do Active Directory
+      default: 389
+    adBaseDn:
+      type: string
+      title: Base DN do Domínio
+      default: "dc=fazendaprogresso,dc=com,dc=local"
+    adBindDn:
+      type: string
+      title: Bind DN da Conta de Serviço
+      default: "FP\\glpi"
+    adBindPassword:
+      type: string
+      title: Senha do Bind DN
+      default: "glpi@123#"
+    adUseTls:
+      type: boolean
+      title: Usar LDAPS / TLS
+      default: false
+    glpiTicketUrl:
+      type: string
+      title: Link do GLPI para Recuperação de Senha
+      default: ""
 benefits:
-  - title: Gestão Agrícola
-    description: Intranet completa da Fazenda Progresso.
+  - title: Autenticação Corporativa Integrada
+    description: Login único com as mesmas credenciais do computador/Active Directory da Fazenda Progresso.
+  - title: Armazenamento S3 com Garage
+    description: Stack completa com Garage (S3-compatível, leve, sem Redis/etcd) e PostgreSQL 16, provisionados automaticamente.
+  - title: Sem containers temporários instáveis
+    description: A inicialização do Garage é feita via CLI diretamente no container — sem containers init que quebram o deploy no Docker Swarm.
 features:
-  - title: Completo
-    description: Frontend Next.js, Backend NestJS, Postgres, MinIO e mais.
+  - title: Next.js 16 Standalone
+    description: Performance máxima com SSR e consumo reduzido de memória.
+  - title: Auto-provisionamento de Colaboradores
+    description: Criação e sincronização automática de usuários a partir do Active Directory.
+  - title: Garage S3 Object Storage
+    description: Armazenamento de objetos leve e S3-compatível, ideal para nó único sem overhead do MinIO.
 tags:
+  - Productivity
   - Utility
