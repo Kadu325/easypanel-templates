@@ -72,7 +72,7 @@ export function generate(input: Input): Output {
         },
       ],
       deploy: {
-        command: `/usr/local/bin/garage -c /etc/garage.toml server`,
+        command: `/garage -c /etc/garage.toml server`,
         configFiles: [
           {
             mountPath: "/etc/garage.toml",
